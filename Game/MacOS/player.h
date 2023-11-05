@@ -2,58 +2,64 @@
 #define PLAYER_H
 #include<vector>
 #include<string>
+#include<algorithm>
 #include "items.h"
 using namespace std;
 
+// Stats protected/private implementation
+// > Use vector to return stats
 namespace Game {
     class Player {
     protected:
-        string id;
+        string name;
+        string Class;
     public:
-        float hp;  // stat
-        float speed;  // stat
-        float def;  // stat
-        float base_attack;  // stat
-        float bal;  // bal
-        float exp;  // exp
-        float exp_required;  // exp
-        int level;  // exp and stat
-        int stat_point;  // stat
-        int tax;  // stat
+        float vitality;
+        float strength;
+        float intelligence;
+        float agility;
+        float dexterity;
+        float wisdom;
+        float luck;
+        float charisma;
+        float pDef;
+        float mDef;
+        float constitution;
+        float phyPenetration;  // unimplemented - but added to stats
+        float magPenetration;  // unimplemented - but added to stats
+        float critChance; // unimplemented
+        float critDamage; // unimplemented
+        float bal;
+        float exp;
+        float exp_required;
+        float expMultiplier; // unimplemented
+        float moneyMultiplier; // unimplemented
+        int level;
+        int stat_point;
+        int tax;
         int weapon;
         int helm;
         int chestplate;
         int leggings;
         int boots;
-        vector<float> getPStats ()
-        {
-            std::vector<float> stats = {hp, speed, def, base_attack};
-            return stats;
-        }
-        float getBalance()
-        {
-            return bal;
-        }
-        int getLevel ()
-        {
-            return level;
-        }
+        
+        string getClass () { return Class; }
+
+        // Remvoe getBalance and getExp
+        // Combine getLevel and get SP
+        float getBalance() { return bal; }
+        int getLevel () { return level;  }
         vector<float> getExp()
         {
             std::vector<float> expa = {exp, exp_required};
             return expa;
         }
-        int getSP()
-        {
-            return stat_point;
-        }
-        string getName()
-        {
-            return id;
-        }
+        int getSP() { return stat_point; }
+        string getName() { return name; }
         auto getData()
         {
-            auto Data = make_pair(vector<float>{hp, speed, def, base_attack, bal, exp, exp_required}, vector<int>{level, stat_point, tax, weapon, helm, chestplate, leggings, boots});
+            // vit, str, int, agi, dex, wis, luck, pdef, mdef, pPene, mPene, critC, critD, expMulti, moneyMulti, cons, bal, exp, expr
+            auto Data = make_pair(Class, make_pair(vector<float>{vitality, strength, intelligence, agility, dexterity, wisdom, luck, pDef, mDef, phyPenetration, magPenetration, critChance, critDamage, expMultiplier, moneyMultiplier,constitution, bal, exp, exp_required}, vector<int>{level, stat_point, tax, weapon, helm, chestplate, leggings, boots}));
             return Data;
         }
     };
@@ -61,17 +67,34 @@ namespace Game {
     class Inventory : public Player {
     private:
         static map<int, int> inventory;
+        static vector<int> skills;
     public:
-        Inventory (string _id, float _hp, float spd, float _def, float ba, float _bal, float _exp, float expr, int lvl, int sp, int _tax, int w, int h, int cp, int l, int b)
+        // name, class, vit, str, int, agi, dex, wis, luck, pDef, mDef, pPene*, mPene*, critC*, critD*, expMulti*, moneyMulti*,cons, bal, exp, expr, lvl, sp, tax, w, h, cp, l, b
+        // Simplify arguments to STATS
+        // Simplify stats to vector instead of individually adding them
+        Inventory (string _name, string _class, vector<float> _stats, int lvl, int sp, int _tax, int w, int h, int cp, int l, int b)
         {
-            id = _id;
-            hp = _hp;
-            speed = spd;
-            def = _def;
-            base_attack = ba;
-            bal = _bal;
-            exp = _exp;
-            exp_required = expr;
+            name = _name;
+            Class = _class;
+            vitality = _stats[0];
+            strength = _stats[1];
+            intelligence = _stats[2];
+            agility = _stats[3];
+            dexterity = _stats[4];
+            wisdom = _stats[5];
+            luck = _stats[6];
+            pDef = _stats[7];
+            mDef = _stats[8];
+            phyPenetration = _stats[9];
+            magPenetration =  _stats[10];
+            critChance = _stats[11];
+            critDamage = _stats[12];
+            expMultiplier = _stats[13];
+            moneyMultiplier = _stats[14];
+            constitution = _stats[15];
+            bal = _stats[16];
+            exp = _stats[17];
+            exp_required = _stats[18];
             level = lvl;
             stat_point = sp;
             tax = _tax;
@@ -81,7 +104,23 @@ namespace Game {
             leggings = l;
             boots = b;
         }
-        
+
+        void addSkill(int id)
+        {
+            if (id != 0)
+            {
+                int _a = 0;
+                for (int x = 0; x < skills.size(); x++)
+                {
+                    if (id == skills[x])
+                    {
+                        _a++;
+                    }
+                }
+                if (_a == 0) { skills.push_back(id); }
+            }
+        }
+
         // Category and Sub-category addition
         void addItem(int _id, int _amount)
         {
@@ -90,6 +129,7 @@ namespace Game {
         }
 
         auto getInventory() { return inventory; }
+        auto getSkills() { return skills; }
 
         void unequipItem(int toUnequip)
         {
@@ -107,10 +147,21 @@ namespace Game {
                 effect = effects.at(1 + 2 * (_ea - 1));
                 switch (idk)
                 {
-                case 1: base_attack -= effect; break;
-                case 2: speed -= effect; break;
-                case 3: def -= effect; break;
-                case 4:  hp -= effect; break;
+                case 1: vitality -= effect; break;
+                case 2: strength -= effect; break;
+                case 3: intelligence -= effect; break;
+                case 4: agility -= effect; break;
+                case 5: dexterity -= effect; break;
+                case 6: wisdom -= effect; break;
+                case 7: luck -= effect; break;
+                case 8: pDef -= effect; break;
+                case 9: mDef -= effect; break;
+                case 10: phyPenetration -= effect; break;
+                case 11: magPenetration -= effect; break;
+                case 12: critChance -= effect; break;
+                case 13: critDamage -= effect; break;
+                case 14: expMultiplier -= effect; break;
+                case 15: moneyMultiplier -= effect; break;
                 }
             }
         }
@@ -135,10 +186,21 @@ namespace Game {
                 effect = effects.at(1 + 2 * (_ea - 1));
                 switch (idk)
                 {
-                case 1: base_attack += effect; break;
-                case 2: speed += effect; break;
-                case 3: def += effect; break;
-                case 4: hp += effect; break;
+                case 1: vitality += effect; break;
+                case 2: strength += effect; break;
+                case 3: intelligence += effect; break;
+                case 4: agility += effect; break;
+                case 5: dexterity += effect; break;
+                case 6: wisdom += effect; break;
+                case 7: luck += effect; break;
+                case 8: pDef += effect; break;
+                case 9: mDef += effect; break;
+                case 10: phyPenetration += effect; break;
+                case 11: magPenetration += effect; break;
+                case 12: critChance += effect; break;
+                case 13: critDamage += effect; break;
+                case 14: expMultiplier += effect; break;
+                case 15: moneyMultiplier += effect; break;
                 }
             }
             cout << name << "Successfully equipped";
@@ -194,22 +256,49 @@ namespace Game {
                         switch (idk)
                         {
                         case 1:
-                            cout << "Base Attack + " << effect << endl;
+                            cout << "VIT + " << effect << endl;
                             break;
                         case 2:
-                            cout << "Speed + " << effect << endl;
+                            cout << "STR + " << effect << endl;
                             break;
                         case 3:
-                            cout << "Defence + " << effect << endl;
+                            cout << "INT + " << effect << endl;
                             break;
                         case 4:
-                            cout << "HP + " << effect << endl;
+                            cout << "AGI + " << effect << endl;
                             break;
                         case 5:
-                            cout << "Bonus EXP + " << effect << endl;
+                            cout << "DEX + " << effect << endl;
                             break;
                         case 6:
-                            cout << "Bonus Moula + " << effect << endl;
+                            cout << "WIS + " << effect << endl;
+                            break;
+                        case 7:
+                            cout << "LUCK + " << effect << endl;
+                            break;
+                        case 8:
+                            cout << "Physical Def + " << effect << endl;
+                            break;
+                        case 9:
+                            cout << "Magical Def + " << effect << endl;
+                            break;
+                        case 10:
+                            cout << "Physical Penetration + " << effect << endl;
+                            break;
+                        case 11:
+                            cout << "Magical Penetration + " << effect << endl;
+                            break;
+                        case 12:
+                            cout << "Critical Chance + " << effect << endl;
+                            break;
+                        case 13:
+                            cout << "Critical Damage + " << effect << endl;
+                            break;
+                        case 14:
+                            cout << "EXP Multiplier + " << effect << endl;
+                            break;
+                        case 15:
+                            cout << "Money Multiplier + " << effect << endl;
                             break;
                         }
                     }
@@ -228,5 +317,5 @@ namespace Game {
 }
 
 map<int, int> Game::Inventory::inventory;
-
+vector<int> Game::Inventory::skills;
 #endif

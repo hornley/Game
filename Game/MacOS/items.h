@@ -11,13 +11,46 @@ using json = nlohmann::json;
 using namespace std;
 
 // Adds a new item in the items.json
+// Types
+// 1 -> Default
+// 2 -> Player Created
+// 3 -> Player Modified
 // unconfirmed: Might need a restart to see changes...
-void addItem(int id, string r, string n, string c, string sc, int cost, int lvl_req, vector<int> effects)
+// When publish change 1 to 2
+void addItem()
 {
     ifstream in(itemsPath);
     json file = json::parse(in);
+    string r, n, c, sc;
+    int id, cost, lvl_req, xa, ca;
+    vector<int> effects;
 
-    file[c][sc][to_string(id)] = make_pair(vector<string>{r, n}, make_pair(vector<int>{cost, lvl_req}, vector<int>{effects}));
+    cout << "Item ID: ";
+    cin >> id;
+    cout << "Item Name: ";
+    cin.ignore();
+    getline(cin, n);
+    cout << "Item Rarity: ";
+    cin >> r;
+    cout << "Item Category: ";
+    cin >> c;
+    cout << "Item Sub-category: ";
+    cin >> sc;
+    cout << "Item Cost: ";
+    cin >> cost;
+    cout << "Item Level Requirement: ";
+    cin >> lvl_req;
+    do{
+        cout << "Item Effect: ";
+        cin >> xa;
+        if (xa == 0) { break; }
+        effects.push_back(xa);
+        cout << "Item Effect Add: ";
+        cin >> ca;
+        effects.push_back(ca);
+    } while (true);
+
+    file[c][sc][to_string(id)] = make_pair(vector<string>{r, n}, make_pair(vector<int>{cost, lvl_req, 1}, vector<int>{effects}));
 
     ofstream out(itemsPath);
     out << setw(4) << file << endl;
@@ -48,9 +81,10 @@ auto getItems()
                 string sc = _sc.key();
                 int cost = _id.value()[1][0][0];
                 int lvl_req = _id.value()[1][0][1];
+                int type = _id.value()[1][0][2];
                 vector<int> effects = _id.value()[1][1];
 
-                items[id] = make_pair(vector<string>{r, n, c, sc}, make_pair(vector<int>{cost, lvl_req}, vector<int>{effects}));
+                items[id] = make_pair(vector<string>{r, n, c, sc}, make_pair(vector<int>{cost, lvl_req, type}, vector<int>{effects}));
             }
         }
     }
@@ -77,9 +111,10 @@ auto getItem(int id)
             string n = iter->second.first[1];
             int cost = iter->second.second.first[0];
             int lvl_req = iter->second.second.first[1];
+            int type = iter->second.second.first[2];
             vector<int> effects = iter->second.second.second;
 
-            _x[id] = make_pair(vector<string>{r, n, c, sc}, make_pair(vector<int>{cost, lvl_req}, vector<int>{effects}));
+            _x[id] = make_pair(vector<string>{r, n, c, sc}, make_pair(vector<int>{cost, lvl_req, type}, vector<int>{effects}));
         }
     }
 

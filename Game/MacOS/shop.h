@@ -75,24 +75,51 @@ int item_choose()
                 idk_2 = iter->second.second.second.at(1 + 2 * (_ea - 1));
                 switch (idk)
                 {
-                case 1:
-                    cout << "Base Attack + " << idk_2 << endl;
-                    break;
-                case 2:
-                    cout << "Speed + " << idk_2 << endl;
-                    break;
-                case 3:
-                    cout << "Defence + " << idk_2 << endl;
-                    break;
-                case 4:
-                    cout << "HP + " << idk_2 << endl;
-                    break;
-                case 5:
-                    cout << "Bonus EXP + " << idk_2 << endl;
-                    break;
-                case 6:
-                    cout << "Bonus Moula + " << idk_2 << endl;
-                    break;
+                    case 1:
+                        cout << "VIT + " << effect << endl;
+                        break;
+                    case 2:
+                        cout << "STR + " << effect << endl;
+                        break;
+                    case 3:
+                        cout << "INT + " << effect << endl;
+                        break;
+                    case 4:
+                        cout << "AGI + " << effect << endl;
+                        break;
+                    case 5:
+                        cout << "DEX + " << effect << endl;
+                        break;
+                    case 6:
+                        cout << "WIS + " << effect << endl;
+                        break;
+                    case 7:
+                        cout << "LUCK + " << effect << endl;
+                        break;
+                    case 8:
+                        cout << "Physical Def + " << effect << endl;
+                        break;
+                    case 9:
+                        cout << "Magical Def + " << effect << endl;
+                        break;
+                    case 10:
+                        cout << "Physical Penetration + " << effect << endl;
+                        break;
+                    case 11:
+                        cout << "Magical Penetration + " << effect << endl;
+                        break;
+                    case 12:
+                        cout << "Critical Chance + " << effect << endl;
+                        break;
+                    case 13:
+                        cout << "Critical Damage + " << effect << endl;
+                        break;
+                    case 14:
+                        cout << "EXP Multiplier + " << effect << endl;
+                        break;
+                    case 15:
+                        cout << "Money Multiplier + " << effect << endl;
+                        break;
                 }
             }
 
@@ -112,10 +139,6 @@ auto shop(Game::Inventory player) {
     int item_id, _back;
     string name;
     float cost, bal = player.getBalance();
-    float hp = player.getPStats()[0];
-    float spd = player.getPStats()[1];
-    float def = player.getPStats()[2];
-    float base_attack = player.getPStats()[3];
 
     map<int, pair<vector<string>, pair<vector<int>, vector<int>>>> items = getItems();
     item_id = item_choose();

@@ -7,14 +7,13 @@
 #include "enemy.h"
 #include "player.h"
 #include "main.h"
+#include "skills.h"
 using namespace Game;
 
 int _aa;
-
 auto enemies()
 {
-    addEnemy();
-    Enemy enemy(1, "Dum", 0, 0, 0, 0, 0, 0, 0, 0);
+    Enemy enemy(1, "Dummy", {75, 2, 0, 35, 0, 0, 3, 1, 0, 0, 0, 0, 10, 400}, 1, 1);
     int _xa, eChosen;
 
     map<int, pair<string, pair<vector<float>, vector<int>>>> _x = enemy.getAllEnemy();
@@ -43,24 +42,38 @@ auto enemies()
                 {
                     int id = iter->first;
                     string name = iter->second.first;
-                    float hp = iter->second.second.first.at(0);
-                    float spd = iter->second.second.first.at(1);
-                    float def = iter->second.second.first.at(2);
-                    float ba = iter->second.second.first.at(3);
-                    float eg = iter->second.second.first.at(4);
-                    float rw = iter->second.second.first.at(5);
+                    float vit = iter->second.second.first.at(0);
+                    float str = iter->second.second.first.at(1);
+                    float Int = iter->second.second.first.at(2);
+                    float agi = iter->second.second.first.at(3);
+                    float dex = iter->second.second.first.at(4);
+                    float wis = iter->second.second.first.at(5);
+                    float pDef = iter->second.second.first.at(6);
+                    float mDef = iter->second.second.first.at(7);
+                    float pp = iter->second.second.first.at(8);
+                    float mp = iter->second.second.first.at(9);
+                    float cc = iter->second.second.first.at(10);
+                    float cd = iter->second.second.first.at(11);
+                    float eg = iter->second.second.first.at(12);
+                    float rw = iter->second.second.first.at(13);
                     int lvl = iter->second.second.second.at(0);
                     int type = iter->second.second.second.at(1);
 
                     // Show Enemy Stats and who is first turn
 
                     system(systemOS);
-                    cout << name;
-                    cout << " | Level: " << lvl << endl;
-                    cout << "Hit Points:   " << hp << endl;
-                    cout << "Speed:\t      " << spd << endl;
-                    cout << "Def:\t      " << def << endl;
-                    cout << "Base Attack:  " << ba << endl;
+                    cout << name << " - (Level " << lvl << ")" << endl;
+                    cout << "Vitality:          " << vit << endl;
+                    cout << "Agility:           " << agi << endl;
+                    cout << "Strenght:          " << str << endl;
+                    cout << "Intelligence:      " << Int << endl;
+                    cout << "Dexterity:         " << dex << endl;
+                    cout << "Wisdom:            " << wis << endl;
+                    cout << "Physical Def:      " << pDef << endl;
+                    cout << "Magical Def:       " << mDef << endl;
+                    cout << "\nRewards:\n";
+                    cout << "EXP:               " << eg << endl;
+                    cout << "Money:             " << rw << endl;
 
                     _aa = 0;
                     cout << "\nDo you want to fight " << name << "?\n";
@@ -69,7 +82,7 @@ auto enemies()
 
                     if (_aa == 1) 
                     {
-                        Enemy enemys(id, name, hp, spd, def, ba, eg, rw, lvl, type);
+                        Enemy enemys(id, name, {vit, str, Int, agi, dex, wis, pDef, mDef, pp, mp, eg, rw}, lvl, type);
                         return enemys;
                         break;
                     }
@@ -82,38 +95,80 @@ auto enemies()
     return enemy;
 }
 
+// To be Added:
+// > Endurance (dmg red)
+// > Accuracy (hit chance)
+// > Crit Chance and Crit Damage
+auto damage_dealt(int dmg_type, float pDef, float mDef, float pPene, float mPene, vector<float> stats, vector<float> ratio)
+{
+    float damage, totdmg = 1;
+    // dmg_type:
+    // 1 -> Physical 
+    // 2 -> Magical
+    // 3 -> Both
+        damage = 0;
+        for (int i = 0; i < ratio.size(); i += 2)
+        {
+            float stat = ratio[i];
+            float statuse = stats[stat - 1];
+            float sRatio = ratio[i + 1];
+            damage += statuse * sRatio;
+        }
+
+    if (dmg_type == 1) { totdmg = damage * (200/(200+pDef)); }
+    else if (dmg_type == 2) { totdmg = damage * (275/(275+mDef)); }
+    return totdmg;
+}
+
 // Only for normal types! (without heal and other things)
 auto normal_fight(Inventory player, Enemy enemy)
 {
     if (enemy.getID() == 1) { return player; }
     // Player
     string name = player.getName();
-    float hp = player.getPStats()[0];
-    float spd = player.getPStats()[1];
-    float def = player.getPStats()[2];
-    float base_attack = player.getPStats()[3];
-    float bal = player.getBalance();
-    float exp = player.getExp()[0];
-    float exp_required = player.getExp()[1];
+    float vit = player.getData().second.first[0];
+    float str = player.getData().second.first[1];
+    float Int = player.getData().second.first[2];
+    float agi = player.getData().second.first[3];
+    float dex = player.getData().second.first[4];
+    float wis = player.getData().second.first[5];
+    float luck = player.getData().second.first[6];
+    float pDef = player.getData().second.first[7];
+    float mDef = player.getData().second.first[8];
+    float pPene = player.getData().second.first[9];
+    float mPene = player.getData().second.first[10];
+    float critC = player.getData().second.first[11];
+    float critD = player.getData().second.first[12];
+    float expMulti = player.getData().second.first[13];
+    float moneyMulti = player.getData().second.first[14];
+    float cons = player.getData().second.first[15];
+    float bal = player.getData().second.first[16];
+    float exp = player.getData().second.first[17];
+    float exp_required = player.getData().second.first[18];
     int level = player.getLevel();
-    int stat_point = player.getSP();
 
     // Enemy
     string enemy_name = enemy.name;
-    float enemy_hp = enemy.hp;
-    float enemy_spd = enemy.speed;
-    int enemy_ba = enemy.base_attack;
-    float enemy_def = enemy.def;
+    float enemy_vit = enemy.vitality;
+    float enemy_agi = enemy.agility;
+    float enemy_str = enemy.strength;
+    float enemy_int = enemy.intelligence;
+    float enemy_dex = enemy.dexterity;
+    float enemy_pDef = enemy.pDef;
+    float enemy_mDef = enemy.mDef;
+    float enemy_cChance = enemy.critChance;
+    float enemy_cDamage = enemy.critDamage;
     float exp_gain = enemy.exp_gain;
     float enemy_reward = enemy.rewards;
 
     bool player_turn, enemy_turn, success, wl=false;
-    int healing_done, _XL, chp, echp, enhancement, action, heal=1, heal_option, forfeit, damage, attack;
+    int healing_done, _XL, chp, echp, enhancement, action, heal=1, heal_option, forfeit, damage, attack, p_turn_amount=1, p_turn=1, e_turn_amount=1, e_turn=1;
 
     healing_done = 0;
     system(systemOS);
     cout << "First Turn: ";
-    if (spd > enemy_spd) {
+    if (agi > enemy_agi or agi == enemy_agi) {
+        p_turn_amount = agi / enemy_agi;
         player_turn = true;
         enemy_turn = false;
         cout << name;
@@ -121,17 +176,19 @@ auto normal_fight(Inventory player, Enemy enemy)
 
     // enemy first turn
     else {
+        e_turn_amount = enemy_agi / agi;
         player_turn = false;
         enemy_turn = true;
         cout << enemy_name;
     }
+
     cout << "\nPress ENTER to continue...\n";
     cin.clear();
     cin.ignore();
     cin.ignore();
 
-    chp = hp;        // Player HP to use for Battling
-    echp = enemy_hp; // Enemy max HP
+    chp = vit;        // Player HP to use for Battling
+    echp = enemy_vit; // Enemy max HP
     while (chp > 0) {
         float bal = player.getBalance();
         // Battle Action
@@ -148,11 +205,24 @@ auto normal_fight(Inventory player, Enemy enemy)
             if (action == 1) {
                 system(systemOS);
                 cout << "Choose an attack!\n";
-                cout << "1. Money enhanced attack\n";
-                cout << "2. Normal attack\n";
+                cout << "1. Money attack\n";
+                vector<int> playerSkills = player.getSkills();
+                map<int, pair<vector<int>, vector<float>>> choices;
+                Skill Dummy(0, 0, "asd", "Dummy", 0, 0, 0, {0, 0});
+                int _xa = 2;
+                for (int i = 0; i < playerSkills.size(); i++)
+                {
+                    map<int, pair<vector<string>, pair<vector<int>, vector<float>>>> Skills = Dummy.getSkill(playerSkills[i]);
+                    map<int, pair<vector<string>, pair<vector<int>, vector<float>>>>::iterator iter;
+                    for (auto iter = Skills.begin(); iter != Skills.end(); iter++)
+                    {
+                        cout << _xa << ". " << iter->second.first[0] << endl;
+                        choices.insert({_xa, make_pair(vector<int>{iter->second.second.first}, vector<float>{iter->second.second.second})});
+                        _xa++;
+                    }
+                }
                 cin >> attack;
                 system("clear;");
-                // Attack Option
                 if (attack == 1) {
                     cout << "You currently have: " << bal << " in your balance.\n";
                     cout << "How much do you want to use to enhance you attack?\n";
@@ -162,12 +232,19 @@ auto normal_fight(Inventory player, Enemy enemy)
                     }
                     else {
                         player.bal -= enhancement;
-                        damage = base_attack * 0.30 * enhancement;
+                        damage = str * 0.30 * enhancement;
                         success = true;
                     }
                 }
-                else if (attack == 2) {
-                    damage = base_attack;
+                else if (attack <= choices.size() + 1) {
+                    map<int, pair<vector<int>, vector<float>>>::iterator iter;
+                    for (auto iter = choices.begin(); iter != choices.end(); iter++)
+                    {
+                        if (attack == iter->first)
+                        {
+                            damage = damage_dealt(iter->second.first[3], enemy_pDef, enemy_mDef, pPene, mPene, vector<float>{str, Int, agi, dex}, iter->second.second);
+                        }
+                    }
                     success = true;
                 }
                 else {
@@ -176,30 +253,33 @@ auto normal_fight(Inventory player, Enemy enemy)
                 // Successful Action
                 if (success) {
                     system(systemOS);
+                    echp -= damage;
                     cout << "You dealt " << damage << endl;
-                    damage *= (200/(200+enemy_def));
-                    enemy_hp -= damage;
-                    cout << "Enemy's HP: " << enemy_hp << endl;
+                    cout << "Enemy's HP: " << echp << endl;
                     // WINNING
-                    if (enemy_hp <= 0) {
+                    if (echp <= 0) {
                         float bal = player.getBalance();
                         _XL = 0;
                         cout << "\nYOU WON THE FIGHT!\n";
                         cout << "Moula: " << bal << " -> " << bal + enemy_reward << endl;
                         cout << "Exp: " << exp << " -> " << exp + exp_gain << " (" << exp_required << ") " << endl;
-                        exp = player.getExp()[0];
                         player.exp += exp_gain;
                         player.bal += enemy_reward;
+                        exp = player.getExp()[0];
+                        // EXP_REQUIRED NOT UPDATING EVERY LEVEL UP!
                         // LEVEL UP
                         while (exp > exp_required) {
                             player.level += 1;
                             player.exp -= exp_required;
                             player.exp_required *= 1.35;
                             player.stat_point += 4;
-                            player.hp *= 1.1;  // += 5 or 10
-                            player.speed *= 1.1;  // += 3 or 5
-                            player.def += 1;
-                            player.base_attack *= 1.1; // += 1 or 2
+                            player.vitality *= 1.1;  // tbc
+                            player.agility *= 1.1;  // tbc
+                            player.dexterity *= 1.1;  // tbc
+                            player.wisdom *= 1.1;  // tbc
+                            player.pDef += 1;
+                            player.mDef += 1;
+                            player.strength *= 1.1;  // tbc
                             exp -= exp_required;
                             exp_required *= 1.35;
                             _XL++;
@@ -225,7 +305,7 @@ auto normal_fight(Inventory player, Enemy enemy)
                     cout << "You can't use heal anymore!\n";
                 }
 
-                if (chp > hp * 0.8) {
+                if (chp > vit * 0.8) {
                     cout << "You're HP is still above 80%, are you sure?\n";
                     cout << "1 for yes 0 for no\n";
                     cin >> heal;
@@ -251,8 +331,8 @@ auto normal_fight(Inventory player, Enemy enemy)
                         }
                         player.bal -= 100;
                         chp += 15;
-                        if (chp > hp) {
-                            chp -= (chp - hp);
+                        if (chp > vit) {
+                            chp -= (chp - vit);
                         }
                         cout << chp << " + 15\n";
                         success = true;
@@ -265,8 +345,8 @@ auto normal_fight(Inventory player, Enemy enemy)
                         }
                         player.bal -= 200;
                         chp += 40;
-                        if (chp > hp) {
-                            chp -= (chp - hp);
+                        if (chp > vit) {
+                            chp -= (chp - vit);
                         }
                         cout << chp << " + 40\n";
                         success = true;
@@ -279,8 +359,8 @@ auto normal_fight(Inventory player, Enemy enemy)
                         }
                         player.bal -= 400;
                         chp += 100;
-                        if (chp > hp) {
-                            chp -= (chp - hp);
+                        if (chp > vit) {
+                            chp -= (chp - vit);
                         }
                         cout << chp << " + 100\n";
                         success = true;
@@ -293,8 +373,8 @@ auto normal_fight(Inventory player, Enemy enemy)
                         }
                         player.bal -= 700;
                         chp += 250;
-                        if (chp > hp) {
-                            chp -= (chp - hp);
+                        if (chp > vit) {
+                            chp -= (chp - vit);
                         }
                         cout << chp << " + 250\n";
                         success = true;
@@ -307,8 +387,8 @@ auto normal_fight(Inventory player, Enemy enemy)
                         }
                         player.bal -= 1000;
                         chp += 500;
-                        if (chp > hp) {
-                            chp -= (chp - hp);
+                        if (chp > vit) {
+                            chp -= (chp - vit);
                         }
                         cout << chp << " + 500\n";
                         success = true;
@@ -345,8 +425,13 @@ auto normal_fight(Inventory player, Enemy enemy)
 
             // If player turn is successful
             if (success) {
-                enemy_turn = true;
-                player_turn = false;
+                if (p_turn == p_turn_amount)
+                {
+                    enemy_turn = true;
+                    player_turn = false;
+                    e_turn = 1;
+                }
+                else { p_turn++; }
             }
             cin.clear();
             cin.ignore();
@@ -355,8 +440,8 @@ auto normal_fight(Inventory player, Enemy enemy)
         // Enemy Turn na to
         else {
             system(systemOS);
-            damage = (rand() % enemy_ba + 1) * 12.5;
-            damage *= (200/(200+def));
+            // damage = damage_dealt(enemy_str, enemy_int, pDef, mDef, 1);
+            damage = 15;
             cout << "Enemy dealt " << damage << endl;
             chp -= damage;
             cout << "Your HP: " << chp << endl;
@@ -369,8 +454,13 @@ auto normal_fight(Inventory player, Enemy enemy)
             cout << "Press enter to continue!\n";
             cin.clear();
             cin.ignore();
-            player_turn = true;
-            enemy_turn = false;
+            if (e_turn == e_turn_amount)
+            {
+                player_turn = true;
+                enemy_turn = false;
+                p_turn = 1;
+            }
+            else { e_turn++; }
         }
     }
     return player;

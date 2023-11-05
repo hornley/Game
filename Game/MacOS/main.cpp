@@ -2,6 +2,7 @@
 #include<string>
 #include<vector>
 #include<map>
+#include<iomanip>
 #include "json.hpp"
 #include "player.h"
 #include "items.h"
@@ -11,37 +12,41 @@
 #include "battle.h"
 #include "save.h"
 #include "main.h"
+#include "skills.h"
 using namespace Game;
 using json = nlohmann::json;
-char systemOS[5] = {'c', 'l', 'e', 'a', 'r'};
-string playersPath = "/Users/hornley/Documents/VSCode/Personal/MacOS/players.json";
-string itemsPath = "/Users/hornley/Documents/VSCode/Personal/MacOS/items.json";
 
-/*
-To be finished
-- Shop
-> Shop limited items
-> Prompt for buying another copy of item
+#if defined(_WIN32) || defined(WIN32)
+    char systemOS[3] = {'c', 'l', 's'};
+#else
+    char systemOS[5] = {'c', 'l', 'e', 'a', 'r'};
+#endif
 
-> Globally define "clear" for other os
-> Battle Menu
-*> Normal fight (Enemy only attacks)
-*> Unique fight (Enemy can heal)
-*> Boss Fight
-*> Dungeon
-> Enemies and Items in a file
-> Add a function to give others the ability to create their own enemy or item
+string playersPath;
+string itemsPath;
+string skillsPath;
+string enemiesPath;
 
-To fix
-> Input bugs
-*/ 
+void devmode();
 
-void saveData(Inventory player)
+void setPath(int numArgs, char args[])
 {
-    saveItems();
-    save(player);
-}
+    string aux(args);
 
+    #if defined(_WIN32) || defined(WIN32)
+        int pos = aux.rfind('\\');
+    #else
+        int pos = aux.rfind('/');
+    #endif
+
+    string path = aux.substr(0, pos+1);
+    playersPath = path + "players.json";
+    itemsPath = path + "items.json";
+    skillsPath = path + "skills.json";
+    enemiesPath = path + "enemies.json";
+}   
+
+// Better Login Menu
 auto login()
 {
     auto player = loginPlayer();
@@ -66,7 +71,11 @@ auto character(Inventory player)
         {
             player.showInventory();
         }
-        else if (option > 2 or option < 0)
+        else if (option == 3)
+        {
+            cout << player.getSkills()[0];
+        }
+        else if (option > 3 or option < 0)
         {
             cout << "Invalid option!\n";
             cin.clear();
@@ -102,7 +111,11 @@ auto loop()
         {
             player = menu(player);
         }
-        else if (option > 3 or option < 0)
+        else if (option == 4)
+        {
+            devmode();
+        }
+        else if (option > 4 or option < 0)
         {
             cout << "Invalid option!\n";
             cin.clear();
@@ -113,12 +126,38 @@ auto loop()
     return player;
 }
 
-int main()
+int main(int numArgs, char *args[])
 {
+    cout << setprecision(1);
+    cout << fixed;
+    setPath(numArgs, args[0]);
     auto player = loop();
-
-    // addItem(109, "Common", "Omsim", "Weapon", "Sword", 150, 1, {1, 2, 3, 76});
-    // items();
-    
     saveData(player);
+}
+
+void devmode()
+{
+    int option;
+    do
+    {
+        system(systemOS);
+        cout << "Choose an Option!\n";
+        cout << "1. Add Item\n";
+        cout << "2. Add Skill\n";
+        cout << "3. Add Enemy\n";
+        cout << "0. Back\n";
+        cin >> option;
+        if (option == 1)
+        {
+            addItem();
+        }
+        else if (option == 2)
+        {
+            addSkill();
+        }
+        else if (option == 3)
+        {
+            addEnemy();
+        }
+    } while (option != 0);
 }
