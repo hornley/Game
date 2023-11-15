@@ -1,6 +1,7 @@
 # Simple Game by hornley
 
 Simple console/terminal based game.
+Game is currently discontinued.
 
 ## Description
 
